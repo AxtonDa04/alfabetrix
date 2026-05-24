@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reporte Técnico — ALFABETRIX</title>
+<style>
+:root{--guinda:#6A0D37;--verde:#1A5632;--beige:#F5F3EE;--beige2:#EDE8DF;--blanco:#FFFFFF;--gris:#2D2D2D;--gris-claro:#F7F7F7;--borde:#E0E0E0;--ok:#27AE60;--warn:#E67E22;--err:#C0392B;--info:#2980B9;--radius:8px;--nav-w:260px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:15px;color:var(--gris);background:var(--beige);line-height:1.7}
+a{color:var(--guinda);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{line-height:1.3;font-weight:700}
+code,pre{font-family:'Courier New',Courier,monospace}
+
+/* NAV */
+#nav{position:fixed;top:0;left:0;width:var(--nav-w);height:100vh;background:var(--gris);color:#fff;overflow-y:auto;z-index:100;padding:0 0 2rem 0}
+#nav .nav-brand{background:var(--guinda);padding:1.2rem 1.4rem;font-size:1rem;font-weight:700;letter-spacing:.5px}
+#nav .nav-brand span{display:block;font-size:.7rem;font-weight:400;opacity:.7;margin-top:2px}
+#nav ul{list-style:none;padding:.5rem 0}
+#nav ul li a{display:block;padding:.5rem 1.4rem;font-size:.8rem;color:#ccc;border-left:3px solid transparent;transition:all .2s}
+#nav ul li a:hover,#nav ul li a.active{color:#fff;background:rgba(255,255,255,.08);border-left-color:var(--guinda);text-decoration:none}
+#nav .nav-section{padding:.6rem 1.4rem .2rem;font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:#666;font-weight:600}
+
+/* MAIN */
+#main{margin-left:var(--nav-w);padding:0 0 4rem}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--guinda) 0%,#9B1B50 50%,var(--verde) 100%);color:#fff;padding:4rem 3rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-50px;right:-50px;width:300px;height:300px;background:rgba(255,255,255,.05);border-radius:50%}
+.hero::after{content:'';position:absolute;bottom:-80px;left:100px;width:200px;height:200px;background:rgba(255,255,255,.04);border-radius:50%}
+.hero h1{font-size:2.8rem;margin-bottom:.3rem;position:relative}
+.hero .subtitle{font-size:1.1rem;opacity:.85;margin-bottom:1.5rem;position:relative}
+.hero .meta{display:flex;gap:1rem;flex-wrap:wrap;position:relative}
+.hero .meta-tag{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);padding:.3rem .9rem;border-radius:20px;font-size:.8rem;backdrop-filter:blur(4px)}
+
+/* SECTIONS */
+section{padding:2.5rem 3rem;border-bottom:1px solid var(--borde)}
+section:nth-child(even){background:var(--blanco)}
+section:nth-child(odd){background:var(--beige)}
+.section-title{font-size:1.4rem;color:var(--guinda);margin-bottom:1.2rem;display:flex;align-items:center;gap:.6rem}
+.section-title::before{content:'';display:inline-block;width:4px;height:1.4rem;background:var(--guinda);border-radius:2px;flex-shrink:0}
+.section-num{background:var(--guinda);color:#fff;border-radius:50%;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+
+/* CARDS */
+.card{background:var(--blanco);border:1px solid var(--borde);border-radius:var(--radius);padding:1.2rem 1.4rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.card h4{color:var(--guinda);margin-bottom:.5rem;font-size:.95rem}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:1rem}
+.card-stat{background:var(--blanco);border:1px solid var(--borde);border-radius:var(--radius);padding:1rem;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card-stat .num{font-size:2rem;font-weight:700;color:var(--guinda)}
+.card-stat .label{font-size:.8rem;color:#666;margin-top:.2rem}
+
+/* BADGES */
+.badge{display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.72rem;font-weight:600;white-space:nowrap}
+.badge-ok{background:#d4edda;color:#155724}
+.badge-warn{background:#fff3cd;color:#856404}
+.badge-err{background:#f8d7da;color:#721c24}
+.badge-info{background:#d1ecf1;color:#0c5460}
+.badge-neutral{background:#e2e3e5;color:#383d41}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;margin-bottom:1rem;border-radius:var(--radius);border:1px solid var(--borde)}
+table{width:100%;border-collapse:collapse;font-size:.83rem;background:var(--blanco)}
+th{background:var(--guinda);color:#fff;padding:.65rem 1rem;text-align:left;font-weight:600;font-size:.78rem}
+td{padding:.6rem 1rem;border-bottom:1px solid var(--borde);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:#FAFAFA}
+tr:hover td{background:#FFF5F8}
+
+/* CODE */
+pre{background:#1E1E2E;color:#CDD6F4;padding:1.2rem 1.4rem;border-radius:var(--radius);overflow-x:auto;font-size:.8rem;margin-bottom:1rem;line-height:1.6}
+code.inline{background:#F0E8EC;color:var(--guinda);padding:.1rem .4rem;border-radius:4px;font-size:.82rem}
+
+/* FLOW */
+.flow{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:1rem;background:var(--blanco);border:1px solid var(--borde);border-radius:var(--radius);margin-bottom:1rem}
+.flow-step{background:var(--guinda);color:#fff;padding:.35rem .9rem;border-radius:20px;font-size:.78rem;font-weight:600}
+.flow-arrow{color:#999;font-size:1rem}
+
+/* STATUS TABLE */
+.status-ok::before{content:'✅ '}
+.status-warn::before{content:'⚠️ '}
+.status-err::before{content:'❌ '}
+.status-info::before{content:'❓ '}
+
+/* PRIORITY */
+.prio-alta{border-left:4px solid var(--err);padding-left:.8rem;margin-bottom:.6rem}
+.prio-media{border-left:4px solid var(--warn);padding-left:.8rem;margin-bottom:.6rem}
+.prio-baja{border-left:4px solid var(--info);padding-left:.8rem;margin-bottom:.6rem}
+.prio-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:.2rem}
+.prio-alta .prio-label{color:var(--err)}
+.prio-media .prio-label{color:var(--warn)}
+.prio-baja .prio-label{color:var(--info)}
+
+/* CHECKLIST */
+.checklist{list-style:none;margin-bottom:1rem}
+.checklist li{padding:.3rem 0;padding-left:1.5rem;position:relative;font-size:.85rem}
+.checklist li::before{position:absolute;left:0}
+.checklist li.ok::before{content:'✅'}
+.checklist li.warn::before{content:'⚠️'}
+.checklist li.err::before{content:'❌'}
+
+/* TREE */
+.tree{background:#1E1E2E;color:#CDD6F4;padding:1.2rem 1.4rem;border-radius:var(--radius);font-size:.8rem;line-height:1.8;overflow-x:auto}
+.tree .dir{color:#89DCEB}
+.tree .file{color:#A6E3A1}
+.tree .conf{color:#F9E2AF}
+.tree .note{color:#6C7086;font-style:italic}
+
+/* COLOR SWATCHES */
+.swatches{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}
+.swatch{border-radius:6px;padding:.5rem .9rem;font-size:.75rem;font-weight:600;min-width:100px;text-align:center;border:1px solid rgba(0,0,0,.1)}
+
+/* MOBILE NAV TOGGLE */
+#nav-toggle{display:none;position:fixed;top:1rem;left:1rem;z-index:200;background:var(--guinda);color:#fff;border:none;border-radius:6px;width:40px;height:40px;font-size:1.2rem;cursor:pointer}
+
+/* FOOTER */
+footer{background:var(--gris);color:#aaa;text-align:center;padding:1.5rem;font-size:.8rem;margin-left:var(--nav-w)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  #nav{transform:translateX(-100%);transition:transform .3s}
+  #nav.open{transform:translateX(0)}
+  #main,footer{margin-left:0}
+  #nav-toggle{display:block}
+  section{padding:2rem 1.2rem}
+  .hero{padding:3rem 1.2rem}
+  .hero h1{font-size:2rem}
+  #main{padding-top:60px}
+}
+@media print{#nav,#nav-toggle{display:none}#main,footer{margin-left:0}section{page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<button id="nav-toggle" onclick="document.getElementById('nav').classList.toggle('open')">☰</button>
+
+<nav id="nav">
+  <div class="nav-brand">📘 ALFABETRIX<span>Reporte Técnico — 2026</span></div>
+  <ul>
+    <li class="nav-section">Introducción</li>
+    <li><a href="#portada">0. Portada</a></li>
+    <li><a href="#resumen">1. Resumen Ejecutivo</a></li>
+    <li class="nav-section">Stack y Estructura</li>
+    <li><a href="#tecnologias">2. Tecnologías</a></li>
+    <li><a href="#estructura">3. Estructura del Proyecto</a></li>
+    <li><a href="#arquitectura">4. Arquitectura</a></li>
+    <li class="nav-section">Código</li>
+    <li><a href="#paginas">5. Páginas</a></li>
+    <li><a href="#componentes">6. Componentes</a></li>
+    <li><a href="#visual">7. Sistema Visual</a></li>
+    <li class="nav-section">Lógica</li>
+    <li><a href="#logica">8. Lógica Educativa</a></li>
+    <li><a href="#gamificacion">9. Gamificación</a></li>
+    <li><a href="#accesibilidad">10. Accesibilidad</a></li>
+    <li class="nav-section">Backend y Config</li>
+    <li><a href="#base44">11. Integración Base44</a></li>
+    <li><a href="#env">12. Variables de Entorno</a></li>
+    <li><a href="#seguridad">13. Seguridad</a></li>
+    <li><a href="#scripts">14. Scripts</a></li>
+    <li class="nav-section">Guías</li>
+    <li><a href="#local">15. Ejecutar Localmente</a></li>
+    <li><a href="#flujo">16. Flujo del Usuario</a></li>
+    <li><a href="#estado">17. Estado Actual</a></li>
+    <li><a href="#pendientes">18. Pendientes</a></li>
+    <li><a href="#guia-dev">19. Guía para Devs</a></li>
+    <li><a href="#anexos">20. Anexos</a></li>
+  </ul>
+</nav>
+
+<div id="main">
+
+<!-- HERO -->
+<div class="hero" id="portada">
+  <h1>🧠 ALFABETRIX</h1>
+  <p class="subtitle">Aplicación educativa de alfabetización para adultos mayores — Reporte Técnico Completo</p>
+  <div class="meta">
+    <span class="meta-tag">📅 Generado: 22 May 2026</span>
+    <span class="meta-tag">⚡ React 18 + Vite 6</span>
+    <span class="meta-tag">🎨 Tailwind CSS 3</span>
+    <span class="meta-tag">☁️ Base44 SDK 0.8.x</span>
+    <span class="meta-tag"><span style="color:#90EE90">●</span> Build: Exitoso</span>
+    <span class="meta-tag"><span style="color:#90EE90">●</span> Audit: 0 vulnerabilidades</span>
+    <span class="meta-tag">🏫 CONALEP Ixtapaluca · Proyecto 2026</span>
+  </div>
+</div>
+
+<!-- SECCIÓN 1: RESUMEN EJECUTIVO -->
+<section id="resumen">
+  <h2 class="section-title"><span class="section-num">1</span>Resumen Ejecutivo</h2>
+
+  <div class="card">
+    <h4>¿Qué es ALFABETRIX?</h4>
+    <p>ALFABETRIX es una aplicación web educativa diseñada para enseñar a leer y escribir a adultos mayores, especialmente aquellos con nula o escasa educación formal. El proyecto es una iniciativa escolar comunitaria 2026 del CONALEP Ixtapaluca, basada en el programa "Renacer Letras". La interfaz está pensada deliberadamente para personas con dificultades de visión o poca familiaridad con la tecnología: botones grandes, fuentes ajustables, retroalimentación por voz y un flujo simple.</p>
+  </div>
+
+  <div class="card-grid">
+    <div class="card-stat"><div class="num">6</div><div class="label">Módulos de aprendizaje</div></div>
+    <div class="card-stat"><div class="num">10</div><div class="label">Pantallas (páginas)</div></div>
+    <div class="card-stat"><div class="num">7</div><div class="label">Componentes custom</div></div>
+    <div class="card-stat"><div class="num">0</div><div class="label">Vulnerabilidades (npm audit)</div></div>
+  </div>
+
+  <div class="card">
+    <h4>¿Para quién está hecha?</h4>
+    <p>Adultos mayores de comunidades como Ixtapaluca que no saben leer o tienen habilidades lectoras muy básicas. La app está diseñada por y para un contexto de bajo nivel tecnológico: celulares sencillos, redes lentas y usuarios sin experiencia digital.</p>
+  </div>
+
+  <div class="card">
+    <h4>¿Qué problema resuelve?</h4>
+    <p>El analfabetismo en adultos mayores en México. Ofrece un método progresivo (vocales → consonantes → sílabas → palabras → frases → comprensión) con retroalimentación por voz (TTS), pistas visuales, mensajes motivacionales y un sistema de estrellas para motivar la continuidad.</p>
+  </div>
+
+  <div class="card">
+    <h4>Estado actual del proyecto</h4>
+    <p>La app compila sin errores, el servidor de desarrollo levanta correctamente y la conexión con Base44 está activa vía SDK. Los 6 módulos educativos tienen ejercicios predefinidos y generación dinámica con IA (InvokeLLM). El único juego implementado es el de Memoria; los 4 juegos restantes están marcados como "Próximamente". El flujo principal Splash→Perfil→Menú→Módulo→Actividad→Resultados→Progreso está completamente implementado.</p>
+  </div>
+
+  <div class="card">
+    <h4>Partes que dependen de servicios externos</h4>
+    <ul style="padding-left:1.2rem">
+      <li><strong>Base44 SDK</strong>: Persistencia de datos (UserProfile, Progress, Reward), autenticación de usuarios y generación de ejercicios con IA (InvokeLLM). Sin conexión a Base44, la app opera con ejercicios predefinidos pero no guarda progreso.</li>
+      <li><strong>Web Speech API (TTS)</strong>: Requiere soporte del navegador. Funciona en Chrome y Edge modernos; puede fallar en browsers antiguos o iOS Safari sin configuración adicional.</li>
+      <li><strong>Google Fonts</strong>: La fuente Poppins se carga desde fonts.googleapis.com. Sin internet, cae a la pila de fuentes del sistema.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: TECNOLOGÍAS -->
+<section id="tecnologias">
+  <h2 class="section-title"><span class="section-num">2</span>Tecnologías Usadas</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tecnología</th><th>Versión</th><th>Para qué se usa</th><th>Detectado en</th></tr></thead>
+      <tbody>
+        <tr><td><strong>React</strong></td><td>^18.2.0</td><td>Framework principal de UI, componentes, hooks, estado</td><td>package.json, main.jsx</td></tr>
+        <tr><td><strong>Vite</strong></td><td>^6.1.0</td><td>Bundler y servidor de desarrollo, HMR, build</td><td>vite.config.js, package.json</td></tr>
+        <tr><td><strong>Tailwind CSS</strong></td><td>^3.4.17</td><td>Estilos utilitarios, paleta de colores (guinda, verde, beige), responsive</td><td>tailwind.config.js, index.css</td></tr>
+        <tr><td><strong>@base44/sdk</strong></td><td>^0.8.30</td><td>Cliente para Base44: entidades, autenticación, integraciones (LLM, UploadFile)</td><td>package.json, src/api/base44Client.js</td></tr>
+        <tr><td><strong>@base44/vite-plugin</strong></td><td>^1.0.18</td><td>Plugin Vite: alias @/, proxy /api, HMR, inyecciones de HTML</td><td>vite.config.js, package.json</td></tr>
+        <tr><td><strong>React Router DOM</strong></td><td>^6.26.0</td><td>Navegación SPA, rutas, BrowserRouter, Link, useNavigate</td><td>src/App.jsx, páginas</td></tr>
+        <tr><td><strong>@tanstack/react-query</strong></td><td>^5.84.1</td><td>Caché de datos asíncronos, useQuery (usado en PageNotFound)</td><td>package.json, src/lib/query-client.js</td></tr>
+        <tr><td><strong>Framer Motion</strong></td><td>^11.16.4</td><td>Animaciones de entrada, transiciones de tarjetas, animación de estrellas</td><td>MainMenu, ModuleSelect, Results, StarAnimation, MemoryGame</td></tr>
+        <tr><td><strong>Radix UI</strong></td><td>múltiple</td><td>Componentes base accesibles: accordion, dialog, collapsible, select, switch, slider, tabs, etc.</td><td>package.json, src/components/ui/</td></tr>
+        <tr><td><strong>Lucide React</strong></td><td>^0.475.0</td><td>Íconos SVG: ChevronLeft, Star, Award, TrendingUp, BookOpen, Volume2, etc.</td><td>Todas las páginas y componentes</td></tr>
+        <tr><td><strong>canvas-confetti</strong></td><td>^1.9.4</td><td>Animación de confeti en pantalla de resultados cuando el usuario obtiene ≥2 estrellas</td><td>src/pages/Results.jsx</td></tr>
+        <tr><td><strong>Poppins (Google Fonts)</strong></td><td>—</td><td>Tipografía principal de la app, cargada desde CDN de Google</td><td>src/index.css, tailwind.config.js</td></tr>
+        <tr><td><strong>tailwindcss-animate</strong></td><td>^1.0.7</td><td>Animaciones CSS para Radix UI (accordion-down/up)</td><td>tailwind.config.js</td></tr>
+        <tr><td><strong>class-variance-authority</strong></td><td>^0.7.1</td><td>Variantes tipadas para componentes UI (Button, etc.)</td><td>src/components/ui/</td></tr>
+        <tr><td><strong>clsx + tailwind-merge</strong></td><td>^2.1.1 / ^3.0.2</td><td>Utilidades para combinar clases Tailwind de forma inteligente</td><td>src/lib/utils.js, componentes ui/</td></tr>
+        <tr><td><strong>react-hook-form + zod</strong></td><td>^7 / ^3</td><td>Manejo de formularios con validación (presentes en package.json, uso no confirmado en páginas actuales)</td><td>package.json</td></tr>
+        <tr><td><strong>sonner / react-hot-toast</strong></td><td>^2.0 / ^2.6</td><td>Notificaciones toast (presentes, uso no confirmado en código revisado)</td><td>package.json</td></tr>
+        <tr><td><strong>recharts</strong></td><td>^2.15.4</td><td>Gráficas de datos (incluida en deps, no confirmada su uso en páginas revisadas)</td><td>package.json</td></tr>
+        <tr><td><strong>jsPDF + html2canvas</strong></td><td>^4.2.1 / ^1.4.1</td><td>Generación y exportación de PDF (incluida, uso no confirmado en páginas revisadas)</td><td>package.json</td></tr>
+        <tr><td><strong>Web Speech API</strong></td><td>Nativa del browser</td><td>TTS (text-to-speech) en español (es-MX), velocidad 0.85, lectura automática de preguntas y feedback</td><td>src/lib/tts.js</td></tr>
+        <tr><td><strong>localStorage</strong></td><td>API nativa</td><td>Persistencia local de configuración (tamaño de fuente, volumen, alto contraste), token Base44</td><td>src/lib/useSettings.js, src/lib/tts.js, src/lib/app-params.js</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h4>Dependencias instaladas pero sin uso confirmado en el código revisado</h4>
+    <p>Las siguientes dependencias están en <code class="inline">package.json</code> pero no se detectó su uso explícito en las páginas y componentes analizados: <code class="inline">react-day-picker</code>, <code class="inline">react-leaflet</code>, <code class="inline">react-markdown</code>, <code class="inline">three</code>, <code class="inline">@stripe/react-stripe-js</code>, <code class="inline">@hello-pangea/dnd</code>, <code class="inline">embla-carousel-react</code>, <code class="inline">moment</code>, <code class="inline">lodash</code>. Pueden ser residuales del template de Base44 o planeadas para funcionalidades futuras.</p>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: ESTRUCTURA -->
+<section id="estructura">
+  <h2 class="section-title"><span class="section-num">3</span>Estructura General del Proyecto</h2>
+
+  <div class="tree">
+<span class="dir">base44-export-2026-05-22/</span>           <span class="note"># Raíz del proyecto</span>
+├── <span class="conf">index.html</span>                           <span class="note"># Punto de entrada HTML, monta #root</span>
+├── <span class="conf">vite.config.js</span>                       <span class="note"># Config Vite: plugin base44, alias @/</span>
+├── <span class="conf">tailwind.config.js</span>                   <span class="note"># Paleta custom: guinda, verde, beige + Poppins</span>
+├── <span class="conf">postcss.config.js</span>                    <span class="note"># PostCSS para Tailwind</span>
+├── <span class="conf">jsconfig.json</span>                        <span class="note"># Alias @/* → ./src/*, checkJs</span>
+├── <span class="conf">package.json</span>                         <span class="note"># Dependencias y scripts</span>
+├── <span class="conf">.env</span>                                 <span class="note"># Variables de entorno (creado en sesión)</span>
+├── <span class="conf">.gitignore</span>                           <span class="note"># Archivos ignorados por Git</span>
+├── <span class="conf">components.json</span>                      <span class="note"># Config ShadCN/UI</span>
+├── <span class="conf">eslint.config.js</span>                     <span class="note"># ESLint: react, hooks, unused-imports</span>
+├── <span class="conf">reporte_tecnico_alfabetrix.html</span>      <span class="note"># ← Este archivo</span>
+│
+├── <span class="dir">src/</span>                                 <span class="note"># Código fuente principal</span>
+│   ├── <span class="file">main.jsx</span>                         <span class="note"># Entry point React: ReactDOM.createRoot</span>
+│   ├── <span class="file">App.jsx</span>                          <span class="note"># Root: AuthProvider + Router + Routes</span>
+│   ├── <span class="conf">index.css</span>                        <span class="note"># Tailwind base + variables CSS custom</span>
+│   │
+│   ├── <span class="dir">api/</span>                             <span class="note"># Conexión a servicios externos</span>
+│   │   └── <span class="file">base44Client.js</span>              <span class="note"># createClient(@base44/sdk) — fuente única de db</span>
+│   │
+│   ├── <span class="dir">lib/</span>                             <span class="note"># Utilidades y lógica compartida</span>
+│   │   ├── <span class="file">AuthContext.jsx</span>              <span class="note"># Context de autenticación, AuthProvider, useAuth</span>
+│   │   ├── <span class="file">PageNotFound.jsx</span>             <span class="note"># Página 404 con detección de admin</span>
+│   │   ├── <span class="file">app-params.js</span>                <span class="note"># Lee params de URL/localStorage/env</span>
+│   │   ├── <span class="file">modules.js</span>                   <span class="note"># MODULES, INITIAL_EXERCISES, LEX_MESSAGES</span>
+│   │   ├── <span class="file">tts.js</span>                       <span class="note"># speak() y stopSpeaking() vía Web Speech API</span>
+│   │   ├── <span class="file">useSettings.js</span>               <span class="note"># Hook: fontSize, highContrast, volume</span>
+│   │   ├── <span class="file">query-client.js</span>              <span class="note"># Instancia de QueryClient (react-query)</span>
+│   │   └── <span class="file">utils.js</span>                     <span class="note"># cn() — merge de clases Tailwind</span>
+│   │
+│   ├── <span class="dir">pages/</span>                           <span class="note"># Una pantalla por archivo</span>
+│   │   ├── <span class="file">Splash.jsx</span>                   <span class="note"># Pantalla de bienvenida (3.5s → /create-profile)</span>
+│   │   ├── <span class="file">CreateProfile.jsx</span>            <span class="note"># Formulario de nombre y edad del usuario</span>
+│   │   ├── <span class="file">MainMenu.jsx</span>                 <span class="note"># Menú principal con 6 acciones</span>
+│   │   ├── <span class="file">ModuleSelect.jsx</span>             <span class="note"># Selección de módulo con progreso y bloqueos</span>
+│   │   ├── <span class="file">Activity.jsx</span>                 <span class="note"># Ronda de 5 ejercicios con IA o predefinidos</span>
+│   │   ├── <span class="file">Results.jsx</span>                  <span class="note"># Resultados, estrellas, confeti, navegación</span>
+│   │   ├── <span class="file">MyProgress.jsx</span>               <span class="note"># Progreso por módulo + insignias</span>
+│   │   ├── <span class="file">Games.jsx</span>                    <span class="note"># Menú de juegos (solo Memoria activo)</span>
+│   │   ├── <span class="file">Help.jsx</span>                     <span class="note"># FAQ colapsable con TTS por pregunta</span>
+│   │   └── <span class="file">Settings.jsx</span>                 <span class="note"># Fuente, contraste y volumen (localStorage)</span>
+│   │
+│   ├── <span class="dir">components/</span>                      <span class="note"># Componentes reutilizables</span>
+│   │   ├── <span class="file">AppLayout.jsx</span>                <span class="note"># Layout global: aplica fontClass y contrastClass</span>
+│   │   ├── <span class="file">ExerciseRenderer.jsx</span>         <span class="note"># Renderiza ejercicios: opciones, hint, TTS, feedback</span>
+│   │   ├── <span class="file">LexBubble.jsx</span>                <span class="note"># Burbuja de Lex (mascota), autoSpeak</span>
+│   │   ├── <span class="file">MemoryGame.jsx</span>               <span class="note"># Juego de memoria con pares palabra-emoji</span>
+│   │   ├── <span class="file">ProtectedRoute.jsx</span>           <span class="note"># HOC de ruta protegida (revisa auth)</span>
+│   │   ├── <span class="file">StarAnimation.jsx</span>            <span class="note"># Animación de estrellas 0-3 con framer-motion</span>
+│   │   ├── <span class="file">UserNotRegisteredError.jsx</span>   <span class="note"># Pantalla de error para usuarios no registrados</span>
+│   │   └── <span class="dir">ui/</span>                          <span class="note"># ~30 componentes Radix/ShadCN: Button, Input, etc.</span>
+│   │
+│   └── <span class="dir">hooks/</span>                           <span class="note"># Carpeta para hooks custom (actualmente vacía)</span>
+│
+├── <span class="dir">entities/</span>                            <span class="note"># Esquemas de entidades Base44 (carpeta raíz)</span>
+└── <span class="dir">node_modules/</span>                        <span class="note"># Dependencias instaladas</span>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: ARQUITECTURA -->
+<section id="arquitectura">
+  <h2 class="section-title"><span class="section-num">4</span>Arquitectura del Proyecto</h2>
+
+  <h3 style="margin-bottom:.7rem;color:var(--verde)">Flujo de arranque</h3>
+  <div class="flow">
+    <span class="flow-step">index.html</span><span class="flow-arrow">→</span>
+    <span class="flow-step">main.jsx</span><span class="flow-arrow">→</span>
+    <span class="flow-step">App.jsx</span><span class="flow-arrow">→</span>
+    <span class="flow-step">AuthProvider</span><span class="flow-arrow">→</span>
+    <span class="flow-step">QueryClientProvider</span><span class="flow-arrow">→</span>
+    <span class="flow-step">BrowserRouter</span><span class="flow-arrow">→</span>
+    <span class="flow-step">AuthenticatedApp</span><span class="flow-arrow">→</span>
+    <span class="flow-step">Routes</span>
+  </div>
+
+  <div class="card">
+    <h4>Inicialización</h4>
+    <p><code class="inline">index.html</code> define el elemento <code class="inline">&lt;div id="root"&gt;</code>. <code class="inline">main.jsx</code> monta la app con <code class="inline">ReactDOM.createRoot</code> e importa los estilos globales (<code class="inline">index.css</code>). Toda la app está envuelta en <code class="inline">&lt;App /&gt;</code>.</p>
+  </div>
+
+  <div class="card">
+    <h4>Manejo de autenticación (AuthContext)</h4>
+    <p><code class="inline">AuthProvider</code> en <code class="inline">src/lib/AuthContext.jsx</code> intenta llamar a <code class="inline">db.auth.me()</code> al montar. Si hay sesión activa en Base44, obtiene el usuario y marca <code class="inline">isAuthenticated=true</code>. Si no hay sesión, continúa sin bloquear (el flujo Splash → CreateProfile maneja usuarios no autenticados). El componente <code class="inline">AuthenticatedApp</code> en <code class="inline">App.jsx</code> controla qué se muestra según el estado de auth.</p>
+  </div>
+
+  <div class="card">
+    <h4>Sistema de rutas</h4>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Ruta</th><th>Componente</th><th>Requiere Layout</th></tr></thead>
+        <tbody>
+          <tr><td><code class="inline">/</code></td><td>Splash</td><td>No</td></tr>
+          <tr><td><code class="inline">/create-profile</code></td><td>CreateProfile</td><td>Sí (AppLayout)</td></tr>
+          <tr><td><code class="inline">/menu</code></td><td>MainMenu</td><td>Sí</td></tr>
+          <tr><td><code class="inline">/modules</code></td><td>ModuleSelect</td><td>Sí</td></tr>
+          <tr><td><code class="inline">/activity/:moduleId</code></td><td>Activity</td><td>Sí</td></tr>
+          <tr><td><code class="inline">/results</code></td><td>Results</td><td>Sí</td></tr>
+          <tr><td><code class="inline">/progress</code></td><td>MyProgress</td><td>Sí</td></tr>
+          <tr><td><code class="inline">/games</code></td><td>Games</td><td>Sí</td></tr>
+          <tr><td><code class="inline">/help</code></td><td>Help</td><td>Sí</td></tr>
+          <tr><td><code class="inline">/settings</code></td><td>Settings</td><td>Sí</td></tr>
+          <tr><td><code class="inline">*</code></td><td>PageNotFound</td><td>No</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4>Layout global (AppLayout)</h4>
+    <p><code class="inline">AppLayout.jsx</code> es el layout compartido para todas las rutas excepto Splash y 404. Aplica dinámicamente la clase de tamaño de fuente (<code class="inline">text-xl</code>, <code class="inline">text-2xl</code>) y la clase de alto contraste (<code class="inline">high-contrast</code>) leídas desde <code class="inline">useSettings()</code>, que persiste en <code class="inline">localStorage</code>.</p>
+  </div>
+
+  <div class="card">
+    <h4>Conexión con Base44</h4>
+    <p>Existe un único punto de conexión en <code class="inline">src/api/base44Client.js</code>. El cliente se crea con <code class="inline">createClient()</code> del paquete <code class="inline">@base44/sdk</code>, pasando el <code class="inline">appId</code> y una <code class="inline">api_key</code> en headers. Todos los archivos que necesitan acceso a datos importan <code class="inline">{ db }</code> desde este módulo.</p>
+    <pre>import { createClient } from '@base44/sdk';
+const base44 = createClient({
+  appId: "6a0f9d****",        // ID real ocultado
+  headers: { "api_key": "759ae6****" }  // Key real ocultada
+});
+export const db = base44;
+export default base44;</pre>
+  </div>
+</section>
+
+<!-- SECCIÓN 5: PÁGINAS -->
+<section id="paginas">
+  <h2 class="section-title"><span class="section-num">5</span>Páginas Principales</h2>
+
+  <div class="card">
+    <h4>📄 Splash.jsx — <code class="inline">/</code></h4>
+    <div class="table-wrap"><table>
+      <tr><th>Ruta</th><td><code class="inline">/</code></td></tr>
+      <tr><th>Objetivo</th><td>Pantalla de bienvenida animada. Muestra logo CONALEP + ALFABETRIX durante 3.5 segundos y redirige automáticamente a <code class="inline">/create-profile</code>.</td></tr>
+      <tr><th>Componentes</th><td>Framer Motion (motion.div), sin componentes custom</td></tr>
+      <tr><th>Datos</th><td>Ninguno — sin llamadas a API</td></tr>
+      <tr><th>Observaciones</th><td>El Splash siempre redirige a <code class="inline">/create-profile</code>, no a <code class="inline">/menu</code>. Si hay perfil creado, CreateProfile redirige a /menu automáticamente. Funciona como pantalla de transición.</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h4>📄 CreateProfile.jsx — <code class="inline">/create-profile</code></h4>
+    <div class="table-wrap"><table>
+      <tr><th>Objetivo</th><td>Formulario de primer uso. Crea un perfil de usuario (nombre + edad) en Base44. Si ya existe un perfil, redirige a /menu.</td></tr>
+      <tr><th>Componentes</th><td>Button, Input, Label (ShadCN), LexBubble, User y ArrowRight (Lucide)</td></tr>
+      <tr><th>Datos</th><td><code class="inline">db.entities.UserProfile.list()</code> — verificar si ya hay perfil<br/><code class="inline">db.entities.UserProfile.create({name, age, ...})</code> — guardar nuevo perfil</td></tr>
+      <tr><th>TTS</th><td>speak("Bienvenido a Alfabetrix...") al cargar; speak("Mucho gusto, {nombre}...") al guardar</td></tr>
+      <tr><th>Observaciones</th><td>Guarda también: <code class="inline">onboarding_complete: true</code>, <code class="inline">font_size: "large"</code>, <code class="inline">high_contrast: false</code>, <code class="inline">volume: 80</code>. Navega a /menu tras 2s de delay.</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h4>📄 MainMenu.jsx — <code class="inline">/menu</code></h4>
+    <div class="table-wrap"><table>
+      <tr><th>Objetivo</th><td>Menú principal con 6 opciones de navegación en cuadrícula 2x3.</td></tr>
+      <tr><th>Rutas disponibles</th><td>/progress (Mi Progreso), /modules (Aprender), /progress (Mis Logros), /games (Juegos), /help (Ayuda), /settings (Configuración)</td></tr>
+      <tr><th>Datos</th><td><code class="inline">db.entities.UserProfile.list()</code> — obtener nombre del usuario para saludo</td></tr>
+      <tr><th>Observaciones</th><td>Si no hay perfil, redirige a /create-profile. Los ítems "Mi Progreso" y "Mis Logros" apuntan a la misma ruta /progress.</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h4>📄 ModuleSelect.jsx — <code class="inline">/modules</code></h4>
+    <div class="table-wrap"><table>
+      <tr><th>Objetivo</th><td>Lista los 6 módulos de aprendizaje con estado de progreso y bloqueo visual.</td></tr>
+      <tr><th>Datos</th><td><code class="inline">db.entities.Progress.list()</code> — construye mapa moduleId→progreso</td></tr>
+      <tr><th>Lógica de desbloqueo</th><td>Módulo 1 siempre desbloqueado. Módulo N requiere que el módulo N-1 tenga percentage ≥ 70.</td></tr>
+      <tr><th>Observaciones</th><td>Muestra barra de progreso por módulo si pct > 0. Ícono de candado en módulos bloqueados.</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h4>📄 Activity.jsx — <code class="inline">/activity/:moduleId</code></h4>
+    <div class="table-wrap"><table>
+      <tr><th>Objetivo</th><td>Ronda de 5 ejercicios. Usa ejercicios predefinidos (INITIAL_EXERCISES) o genera nuevos con IA.</td></tr>
+      <tr><th>Datos</th><td><code class="inline">db.entities.UserProfile.list()</code> — nombre del usuario para el prompt de IA<br/><code class="inline">db.integrations.Core.InvokeLLM({prompt, response_json_schema, model: "gemini_3_flash"})</code> — genera ejercicios dinámicamente<br/><code class="inline">db.entities.Progress.filter({module_id})</code> — leer progreso actual<br/><code class="inline">db.entities.Progress.create/update(...)</code> — guardar resultados</td></tr>
+      <tr><th>Lógica de estrellas</th><td>5/5 → 3⭐ | 3-4/5 → 2⭐ | 1-2/5 → 1⭐ | 0/5 → 0⭐</td></tr>
+      <tr><th>Observaciones</th><td>Si INITIAL_EXERCISES tiene datos para el módulo, los usa directamente (sin IA). Tras 5 respuestas navega a /results con parámetros en URL.</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h4>📄 Results.jsx — <code class="inline">/results?moduleId=&amp;correct=&amp;stars=&amp;percentage=</code></h4>
+    <div class="table-wrap"><table>
+      <tr><th>Objetivo</th><td>Muestra resultado de la ronda: estrellas animadas, barra de progreso, mensaje de Lex y confeti.</td></tr>
+      <tr><th>Datos</th><td>Lee parámetros de la URL (URLSearchParams). Sin llamadas a API propias.</td></tr>
+      <tr><th>Gamificación</th><td>Confeti con colores guinda/verde/amarillo cuando stars ≥ 2. Mensaje Lex contextual según aciertos.</td></tr>
+      <tr><th>Navegación</th><td>"Continuar" y "Repetir" → /activity/:moduleId | "Menú" → /menu</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h4>📄 MyProgress.jsx — <code class="inline">/progress</code></h4>
+    <div class="table-wrap"><table>
+      <tr><th>Objetivo</th><td>Dashboard de progreso: total de estrellas, insignias, barra por módulo.</td></tr>
+      <tr><th>Datos</th><td><code class="inline">db.entities.Progress.list()</code> y <code class="inline">db.entities.Reward.list()</code> en Promise.all</td></tr>
+      <tr><th>Observaciones</th><td>Muestra aciertos, rondas y estrellas por módulo. El contador de insignias es la longitud de Reward.list(). La lógica para crear/otorgar recompensas no se detectó en el código revisado.</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h4>📄 Games.jsx — <code class="inline">/games</code></h4>
+    <div class="table-wrap"><table>
+      <tr><th>Objetivo</th><td>Menú de 5 juegos. Solo "Memoria" está disponible; los demás muestran "Próximamente".</td></tr>
+      <tr><th>Datos</th><td>Sin llamadas a API. El juego de memoria es completamente local.</td></tr>
+      <tr><th>Juegos pendientes</th><td>Sopa de Letras, Ordena la Frase, Tiro al Blanco, Ruleta de Lectura</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h4>📄 Help.jsx — <code class="inline">/help</code></h4>
+    <div class="table-wrap"><table>
+      <tr><th>Objetivo</th><td>6 FAQs colapsables con TTS por respuesta. Usa componente Collapsible de Radix.</td></tr>
+      <tr><th>Datos</th><td>Sin llamadas a API. Todo el contenido es estático en el archivo.</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h4>📄 Settings.jsx — <code class="inline">/settings</code></h4>
+    <div class="table-wrap"><table>
+      <tr><th>Objetivo</th><td>Ajustes de accesibilidad: tamaño de letra (Normal/Grande/Muy Grande), alto contraste (toggle), volumen de voz (slider 0-100).</td></tr>
+      <tr><th>Datos</th><td>Todo en <code class="inline">localStorage</code> vía <code class="inline">useSettings()</code>. Sin llamadas a Base44.</td></tr>
+      <tr><th>Observaciones</th><td>El botón "Cambiar usuario" solo reproduce un mensaje TTS informativo; no implementa lógica de logout real.</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- CIERRE PROVISIONAL -->
+<section style="text-align:center;padding:2rem;background:var(--beige2)">
+  <p style="color:#888;font-size:.85rem">⏳ Reporte en construcción — guardado parcial. Continuará con secciones 6–20...</p>
+</section>
+
+</div><!-- /main -->
+
+<footer>
+  Reporte Técnico ALFABETRIX · Generado el 22 de Mayo de 2026 · CONALEP Ixtapaluca
+</footer>
+
+</body>
+</html>

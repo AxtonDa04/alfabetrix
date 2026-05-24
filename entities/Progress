@@ -1,0 +1,32 @@
+{
+  "name": "Progress",
+  "type": "object",
+  "properties": {
+    "module_id": {
+      "type": "number",
+      "title": "ID M\u00f3dulo"
+    },
+    "correct_answers": {
+      "type": "number",
+      "default": 0,
+      "title": "Aciertos"
+    },
+    "total_answers": {
+      "type": "number",
+      "default": 0,
+      "title": "Total respuestas"
+    },
+    "stars": {
+      "type": "number",
+      "default": 0,
+      "title": "Estrellas"
+    },
+    "completed": {
+      "type": "boolean",
+      "default": false,
+      "title": "Completado"
+    },
+    "percentage": {
+      "type": "number",
+      "default": 0,
+      "title": "Porcentaje"

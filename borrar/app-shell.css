@@ -1,0 +1,101 @@
+/*
+  App shell móvil para ALFABETRIX.
+
+  Objetivo:
+  - Evitar scroll visible en el body/navegador.
+  - Hacer que la app se sienta como una app móvil.
+  - Mantener el contenido scrolleable dentro de la caja de la app.
+  - En escritorio, centrar la app con ancho tipo celular.
+*/
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(92, 127, 163, 0.16), transparent 32rem),
+    radial-gradient(circle at bottom right, rgba(141, 170, 145, 0.18), transparent 30rem),
+    #e8dccb;
+  overscroll-behavior: none;
+}
+
+#root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Caja principal: se comporta como pantalla de app */
+.app-device-shell {
+  width: min(100vw, 430px);
+  height: min(100dvh, 932px);
+  background: hsl(var(--background));
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow:
+    0 30px 90px rgba(62, 62, 62, 0.22),
+    0 8px 24px rgba(62, 62, 62, 0.12);
+}
+
+/* Scroll interno: se mueve el contenido, no el body */
+.app-device-scroll {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+
+.app-device-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Zonas seguras para celulares con notch/barra inferior */
+.app-device-safe {
+  min-height: 100%;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* En escritorio se ve como una app centrada */
+@media (min-width: 640px) {
+  .app-device-shell {
+    border-radius: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.65);
+  }
+}
+
+/* En móvil ocupa la pantalla completa */
+@media (max-width: 639px) {
+  .app-device-shell {
+    width: 100vw;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+  }
+}
+
+/* Evita rebotes raros al tocar botones o tarjetas */
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Apoya pantallas que usan fixed/inset desde plantillas viejas */
+.app-device-shell .fixed.inset-0 {
+  position: absolute;
+}

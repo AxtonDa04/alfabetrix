@@ -1,0 +1,46 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Nombre"
+    },
+    "age": {
+      "type": "number",
+      "title": "Edad"
+    },
+    "photo_url": {
+      "type": "string",
+      "title": "Foto"
+    },
+    "onboarding_complete": {
+      "type": "boolean",
+      "title": "Onboarding completo",
+      "default": false
+    },
+    "font_size": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "large",
+        "extra-large"
+      ],
+      "default": "large",
+      "title": "Tama\u00f1o de letra"
+    },
+    "high_contrast": {
+      "type": "boolean",
+      "default": false,
+      "title": "Alto contraste"
+    },
+    "volume": {
+      "type": "number",
+      "default": 80,
+      "title": "Volumen"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
