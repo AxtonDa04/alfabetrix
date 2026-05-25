@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProfiles, createProfile, deleteProfile } from "@/services/profileService";
+import { getActiveProfile, getProfiles, createProfile, deleteProfile } from "@/services/profileService";
 import { useAuth } from "@/lib/AuthContext";
 
 import { Button } from "@/components/ui/button";
@@ -57,8 +57,10 @@ export default function CreateProfile() {
 
         setProfiles(normalizedProfiles);
 
-        if (normalizedProfiles.length > 0 && !forceProfileSelect) {
-          setLocalUser(normalizedProfiles[0]);
+        const activeProfile = getActiveProfile(normalizedProfiles);
+
+        if (activeProfile && !forceProfileSelect) {
+          setLocalUser(activeProfile);
           navigate("/menu", { replace: true });
           return;
         }
@@ -126,7 +128,7 @@ export default function CreateProfile() {
     } catch (error) {
       console.error("Error al eliminar perfil:", error);
       window.alert(
-        error?.message || "No se pudo eliminar el perfil. Revise la consola o la conexión con MySQL."
+        error?.message || "No se pudo eliminar el perfil. Revise la consola o la conexión con Supabase."
       );
     } finally {
       setDeletingId(null);
@@ -203,7 +205,7 @@ export default function CreateProfile() {
           <p className="mx-auto mt-2 max-w-xs text-sm font-bold leading-relaxed text-muted-foreground">
             {profiles.length > 0
               ? "Seleccione un perfil guardado, elimínelo o cree uno nuevo."
-              : "Su avance se guardará de forma local en MySQL."}
+              : "Su avance se guardará en Supabase."}
           </p>
         </section>
 

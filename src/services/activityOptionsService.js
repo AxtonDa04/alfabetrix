@@ -1,6 +1,13 @@
-import api from "./apiClient";
+import { supabase } from "./supabaseClient";
 
 export async function getActivityOptions(activityId) {
-  const response = await api.request(`/activity-options/?activity_id=${activityId}`);
-  return response.data;
+  const { data, error } = await supabase
+    .from("activity_options")
+    .select("*")
+    .eq("activity_id", activityId)
+    .order("order_index", { ascending: true });
+
+  if (error) throw error;
+
+  return data || [];
 }

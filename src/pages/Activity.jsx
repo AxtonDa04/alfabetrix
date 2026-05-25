@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 
-import { getProfiles } from "@/services/profileService";
+import { getActiveProfile, getProfiles } from "@/services/profileService";
 import { getActivities } from "@/services/activitiesService";
 import { getActivityOptions } from "@/services/activityOptionsService";
 import { saveProgress } from "@/services/progressService";
@@ -90,9 +90,11 @@ export default function Activity() {
 
         if (!isMounted) return;
 
-        if (profiles.length > 0) {
-          setUserName(profiles[0].name || "");
-          setUserProfileId(profiles[0].id);
+        const activeProfile = getActiveProfile(profiles);
+
+        if (activeProfile) {
+          setUserName(activeProfile.name || "");
+          setUserProfileId(activeProfile.id);
         }
 
         if (!dbModuleId) {
@@ -140,7 +142,7 @@ export default function Activity() {
         setExercises(adapted);
         setLoading(false);
       } catch (error) {
-        console.error("Error al cargar ejercicios desde MySQL:", error);
+        console.error("Error al cargar ejercicios desde Supabase:", error);
 
         if (!isMounted) return;
 
@@ -198,7 +200,7 @@ export default function Activity() {
           });
         }
       } catch (error) {
-        console.error("Error al guardar progreso en MySQL:", error);
+        console.error("Error al guardar progreso en Supabase:", error);
       }
 
       const params = new URLSearchParams({

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { getProfiles } from "@/services/profileService";
+import { getActiveProfile, getProfiles } from "@/services/profileService";
 import { getModules } from "@/services/modulesService";
 import { getProgress } from "@/services/progressService";
 import { useAuth } from "@/lib/AuthContext";
@@ -129,7 +129,7 @@ export default function MainMenu() {
             return;
           }
 
-          profile = normalizeProfile(profiles[0]);
+          profile = normalizeProfile(getActiveProfile(profiles));
 
           if (!profile) {
             navigate("/create-profile");

@@ -1,27 +1,39 @@
-import api from "./apiClient";
+import { supabase } from "./supabaseClient";
 
 export async function getProgress({ userProfileId = null, moduleId = null } = {}) {
-  const params = new URLSearchParams();
+  let query = supabase.from("module_progress").select("*");
 
   if (userProfileId) {
-    params.append("user_profile_id", userProfileId);
+    query = query.eq("user_profile_id", userProfileId);
   }
 
   if (moduleId) {
-    params.append("module_id", moduleId);
+    query = query.eq("module_id", moduleId);
   }
 
-  const query = params.toString();
-  const response = await api.request(`/progress/${query ? `?${query}` : ""}`);
+  const { data, error } = await query.order("updated_at", { ascending: false });
 
-  return response.data;
+  if (error) throw error;
+
+  return data || [];
 }
 
 export async function saveProgress(progressData) {
-  const response = await api.request("/progress/", {
-    method: "POST",
-    body: JSON.stringify(progressData),
-  });
+  const payload = {
+    id: crypto.randomUUID(),
+    current_round: 1,
+    last_activity_at: new Date().toISOString(),
+    completed_at: progressData.completed ? new Date().toISOString() : null,
+    ...progressData,
+  };
 
-  return response.data;
+  const { data, error } = await supabase
+    .from("module_progress")
+    .upsert(payload, { onConflict: "user_profile_id,module_id" })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return data;
 }

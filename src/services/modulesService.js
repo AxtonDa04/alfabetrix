@@ -1,6 +1,13 @@
-import api from "./apiClient";
+import { supabase } from "./supabaseClient";
 
 export async function getModules() {
-    const response = await api.getModules();
-    return response.data;
+  const { data, error } = await supabase
+    .from("modules")
+    .select("*")
+    .eq("is_active", true)
+    .order("order_index", { ascending: true });
+
+  if (error) throw error;
+
+  return data || [];
 }

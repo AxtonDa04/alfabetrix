@@ -1,122 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { MODULES as LOCAL_MODULES } from "../lib/modules";
 import { speak } from "../lib/tts";
+import { getModules } from "@/services/modulesService";
+import { getProgress } from "@/services/progressService";
+import { getRewardCatalog, getRewards } from "@/services/rewardsService";
+import { getStoredActiveProfileId } from "@/services/profileService";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
 import { Star, Award, RefreshCw, CheckCircle2, Sparkles } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import { motion } from "framer-motion";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost/alfabetrix/api/v1";
-
-const PROFILE_OBJECT_KEYS = [
-  "alfabetrix_profile",
-  "alfabetrixProfile",
-  "currentProfile",
-  "selectedProfile",
-  "userProfile",
-  "profile",
-];
-
-const PROFILE_ID_KEYS = [
-  "alfabetrix_profile_id",
-  "profile_id",
-  "profileId",
-  "user_profile_id",
-  "userProfileId",
-  "selectedProfileId",
-];
-
-function safeJsonParse(value) {
-  if (!value) return null;
-
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
-}
-
-function normalizeApiResponse(payload) {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.data)) return payload.data;
-  if (Array.isArray(payload?.results)) return payload.results;
-  if (Array.isArray(payload?.progress)) return payload.progress;
-  if (Array.isArray(payload?.rewards)) return payload.rewards;
-  return [];
-}
-
-async function fetchJson(endpoint, options = {}) {
-  const normalizedEndpoint = endpoint.startsWith("/")
-    ? endpoint.slice(1)
-    : endpoint;
-
-  const response = await fetch(`${API_BASE_URL}/${normalizedEndpoint}`, {
-    headers: {
-      Accept: "application/json",
-      ...(options.headers || {}),
-    },
-    ...options,
-  });
-
-  const text = await response.text();
-
-  let payload = null;
-  try {
-    payload = text ? JSON.parse(text) : null;
-  } catch {
-    throw new Error(
-      `La API respondió algo que no es JSON válido consultando ${normalizedEndpoint}`
-    );
-  }
-
-  if (!response.ok || payload?.success === false) {
-    throw new Error(
-      payload?.message ||
-        payload?.error ||
-        `Error HTTP ${response.status} consultando ${normalizedEndpoint}`
-    );
-  }
-
-  return payload;
-}
-
-async function fetchFirstAvailable(endpoints) {
-  let lastError = null;
-
-  for (const endpoint of endpoints) {
-    try {
-      return await fetchJson(endpoint);
-    } catch (error) {
-      lastError = error;
-      console.warn(`No se pudo consultar ${endpoint}:`, error);
-    }
-  }
-
-  throw lastError || new Error("No se pudo consultar la API.");
-}
-
-function getStoredProfileId() {
-  for (const key of PROFILE_OBJECT_KEYS) {
-    const profile = safeJsonParse(localStorage.getItem(key));
-
-    const id =
-      profile?.id ??
-      profile?.user_profile_id ??
-      profile?.profile_id ??
-      profile?.userProfileId;
-
-    if (id) return String(id);
-  }
-
-  for (const key of PROFILE_ID_KEYS) {
-    const id = localStorage.getItem(key);
-    if (id) return String(id);
-  }
-
-  return null;
-}
 
 function getModuleId(module) {
   const rawId = module?.id ?? module?.module_id ?? module?.moduleId;
@@ -139,7 +31,7 @@ function normalizeModule(module, index = 0) {
     module_key: module.module_key || module.moduleKey || module.key || id,
     name: module.name || module.title || `Módulo ${index + 1}`,
     icon: module.icon || "📘",
-    sort_order: Number(module.sort_order ?? module.order ?? index + 1),
+    sort_order: Number(module.sort_order ?? module.order_index ?? module.order ?? index + 1),
   };
 }
 
@@ -201,7 +93,7 @@ export default function MyProgress() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
-  const profileId = useMemo(() => getStoredProfileId(), []);
+  const profileId = useMemo(() => getStoredActiveProfileId(), []);
 
   useEffect(() => {
     let isMounted = true;
@@ -211,42 +103,31 @@ export default function MyProgress() {
         setLoading(true);
         setLoadError(null);
 
-        const modulesPayload = await fetchFirstAvailable([
-          "modules/",
-          "modules/index.php",
+        const [modulesRows, progressRows, rewardsRows, rewardCatalog] = await Promise.all([
+          getModules(),
+          profileId ? getProgress({ userProfileId: profileId }) : Promise.resolve([]),
+          profileId ? getRewards(profileId).catch(() => []) : Promise.resolve([]),
+          getRewardCatalog().catch(() => []),
         ]);
 
-        const mysqlModules = normalizeApiResponse(modulesPayload)
+        const supabaseModules = modulesRows
           .map(normalizeModule)
           .filter((module) => module.id)
           .sort((a, b) => a.sort_order - b.sort_order);
 
-        const progressEndpoints = profileId
-          ? [
-              `progress/?user_profile_id=${encodeURIComponent(profileId)}`,
-              `progress/index.php?user_profile_id=${encodeURIComponent(profileId)}`,
-            ]
-          : ["progress/", "progress/index.php"];
-
-        const rewardEndpoints = profileId
-          ? [
-              `rewards/?user_profile_id=${encodeURIComponent(profileId)}`,
-              `rewards/index.php?user_profile_id=${encodeURIComponent(profileId)}`,
-              "rewards/",
-              "rewards/index.php",
-            ]
-          : ["rewards/", "rewards/index.php"];
-
-        const [progressPayload, rewardsPayload] = await Promise.all([
-          fetchFirstAvailable(progressEndpoints),
-          fetchFirstAvailable(rewardEndpoints).catch(() => ({ data: [] })),
-        ]);
-
-        const allProgress = normalizeApiResponse(progressPayload)
+        const allProgress = progressRows
           .map(normalizeProgress)
           .filter((progress) => progress.module_id);
 
-        const allRewards = normalizeApiResponse(rewardsPayload)
+        const catalogById = new Map(
+          rewardCatalog.map((reward) => [String(reward.id), reward])
+        );
+
+        const allRewards = rewardsRows
+          .map((reward) => ({
+            ...(catalogById.get(String(reward.reward_id)) || {}),
+            ...reward,
+          }))
           .map(normalizeReward)
           .sort((a, b) => {
             const dateA = new Date(String(a.earned_at || "").replace(" ", "T"));
@@ -261,8 +142,8 @@ export default function MyProgress() {
 
         if (!isMounted) return;
 
-        if (mysqlModules.length > 0) {
-          setModules(mysqlModules);
+        if (supabaseModules.length > 0) {
+          setModules(supabaseModules);
         }
 
         setProgressMap(map);
@@ -271,7 +152,7 @@ export default function MyProgress() {
 
         const completed = allProgress.filter((progress) => progress.completed)
           .length;
-        const totalModules = mysqlModules.length || LOCAL_MODULES.length || 6;
+        const totalModules = supabaseModules.length || LOCAL_MODULES.length || 6;
 
         speak(
           `Ha completado ${completed} de ${totalModules} módulos. ¡Siga adelante!`
@@ -322,7 +203,7 @@ export default function MyProgress() {
       <div className="app-container">
         <AppHeader
           title="Mi Progreso"
-          subtitle="Avance guardado en MySQL"
+          subtitle="Avance guardado en Supabase"
         />
 
         {loadError && (
@@ -330,7 +211,7 @@ export default function MyProgress() {
             <div className="flex items-start gap-2">
               <RefreshCw className="mt-0.5 h-4 w-4" />
               <div>
-                <p className="font-black">No se pudo cargar desde la API.</p>
+                <p className="font-black">No se pudo cargar desde Supabase.</p>
                 <p>{loadError}</p>
               </div>
             </div>

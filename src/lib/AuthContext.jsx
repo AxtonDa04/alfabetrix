@@ -12,6 +12,7 @@ const PROFILE_OBJECT_KEYS = [
 ];
 
 const PROFILE_ID_KEYS = [
+  'activeProfileId',
   'alfabetrix_profile_id',
   'profile_id',
   'profileId',
@@ -19,9 +20,6 @@ const PROFILE_ID_KEYS = [
   'userProfileId',
   'selectedProfileId',
 ];
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost/alfabetrix/api/v1';
 
 function safeJsonParse(value) {
   if (!value) return null;
@@ -53,6 +51,23 @@ function normalizeProfile(profile) {
 }
 
 function getStoredProfile() {
+  const activeProfileId =
+    localStorage.getItem('activeProfileId') ||
+    localStorage.getItem('alfabetrix_profile_id');
+
+  if (activeProfileId) {
+    for (const key of PROFILE_OBJECT_KEYS) {
+      const profile = normalizeProfile(safeJsonParse(localStorage.getItem(key)));
+      if (profile && String(profile.id) === String(activeProfileId)) return profile;
+    }
+
+    return normalizeProfile({
+      id: activeProfileId,
+      user_profile_id: activeProfileId,
+      name: 'Estudiante',
+    });
+  }
+
   for (const key of PROFILE_OBJECT_KEYS) {
     const profile = normalizeProfile(safeJsonParse(localStorage.getItem(key)));
     if (profile) return profile;
@@ -89,8 +104,7 @@ export const AuthProvider = ({ children }) => {
   const appPublicSettings = useMemo(
     () => ({
       mode: 'local',
-      apiBaseUrl: API_BASE_URL,
-      provider: 'mysql_php_api',
+      provider: 'supabase',
     }),
     []
   );
@@ -153,6 +167,7 @@ export const AuthProvider = ({ children }) => {
 
     localStorage.setItem('alfabetrix_profile', JSON.stringify(normalizedProfile));
     localStorage.setItem('alfabetrix_profile_id', String(normalizedProfile.id));
+    localStorage.setItem('activeProfileId', String(normalizedProfile.id));
     setUser(normalizedProfile);
     setIsAuthenticated(true);
   };

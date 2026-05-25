@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getModules } from "@/services/modulesService";
-import { getProfiles } from "@/services/profileService";
+import { getActiveProfile, getProfiles } from "@/services/profileService";
 import { getProgress } from "@/services/progressService";
 
 import { speak } from "../lib/tts";
@@ -54,9 +54,11 @@ export default function ModuleSelect() {
 
         const profiles = await getProfiles();
 
-        if (profiles.length > 0) {
+        const activeProfile = getActiveProfile(profiles);
+
+        if (activeProfile) {
           const allProgress = await getProgress({
-            userProfileId: profiles[0].id,
+            userProfileId: activeProfile.id,
           });
 
           const map = {};
@@ -78,7 +80,7 @@ export default function ModuleSelect() {
 
         speak("Elija el módulo que desea practicar.");
       } catch (error) {
-        console.error("Error al cargar módulos o progreso desde MySQL:", error);
+        console.error("Error al cargar módulos o progreso desde Supabase:", error);
       } finally {
         setLoading(false);
       }

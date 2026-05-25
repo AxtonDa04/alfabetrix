@@ -36,7 +36,7 @@ export default function Settings() {
 
   const handleLogout = () => {
     const confirmed = window.confirm(
-      "¿Desea cerrar esta sesión y volver a elegir usuario? Su progreso guardado en MySQL no se eliminará."
+      "¿Desea cerrar esta sesión y volver a elegir usuario? Su progreso guardado en Supabase no se eliminará."
     );
 
     if (!confirmed) return;
@@ -159,7 +159,7 @@ export default function Settings() {
               <h2 className="text-lg font-black">Cerrar sesión</h2>
               <p className="mt-1 text-sm font-semibold text-muted-foreground">
                 Sale del usuario actual en este dispositivo. No elimina el avance
-                guardado en MySQL.
+                guardado en Supabase.
               </p>
             </div>
           </div>
