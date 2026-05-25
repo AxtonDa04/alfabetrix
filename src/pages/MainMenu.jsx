@@ -4,6 +4,7 @@ import { getActiveProfile, getProfiles } from "@/services/profileService";
 import { getModules } from "@/services/modulesService";
 import { getProgress } from "@/services/progressService";
 import { useAuth } from "@/lib/AuthContext";
+import VoicePermissionModal from "@/components/VoicePermissionModal";
 
 import { speak } from "../lib/tts";
 import { motion } from "framer-motion";
@@ -196,6 +197,7 @@ export default function MainMenu() {
 
   return (
     <main className="alf-mobile-screen alf-safe-nav-space">
+      <VoicePermissionModal />
       <div className="mx-auto w-full max-w-lg space-y-6">
         <motion.section
           initial={{ opacity: 0, y: 18 }}

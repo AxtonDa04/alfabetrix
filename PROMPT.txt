@@ -1,231 +1,211 @@
-MEJORA DE VOZ TTS Y TEXTOS DE AUDIO — ALFABETRIX
+CREAR MODAL DE ACTIVACIÓN DE VOZ PARA CHROME MÓVIL — ALFABETRIX
+
+Problema:
+En Chrome móvil la voz TTS no se escucha porque speechSynthesis puede quedar bloqueado hasta que el usuario interactúa con la página.
 
 Objetivo:
-Mejorar la experiencia de voz de la app para que suene más humana, cordial, clara y menos robótica, sin agregar archivos MP3 ni servicios de pago.
-
-Contexto:
-La app usa Web Speech API.
-El archivo principal es:
-
-src/lib/tts.js
-
-Actualmente los textos se reproducen con:
-SpeechSynthesisUtterance
-
-No existen audios físicos.
-La app lee textos desde:
-- audio_text
-- question
-- LexBubble
-- mensajes de feedback
-- textos de ayuda
-- módulos/actividades
+Crear un componente reutilizable tipo modal/popup para pedir al usuario activar la voz. Debe mostrarse encima de toda la app, con z-index alto, fondo oscuro al 65% de opacidad y estilo visual consistente con ALFABETRIX.
 
 IMPORTANTE:
-No tocar diseño visual.
-No tocar estructura de rutas.
-No modificar base de datos.
+No tocar diseño general de la app.
+No romper navegación.
 No romper Supabase.
 No hacer commit.
 No hacer push.
 
-TAREAS:
+==================================================
+1. CREAR COMPONENTE
+==================================================
 
-1. Mejorar src/lib/tts.js
+Crear archivo:
 
-Revisar la función speak() y ajustarla para:
+src/components/VoicePermissionModal.jsx
 
-- usar lang = "es-MX"
-- seleccionar automáticamente la mejor voz disponible en español
-- priorizar voces de Google o Microsoft si existen
-- priorizar voces con nombres como:
-  Google español
-  Microsoft Dalia
-  Microsoft Sabina
-  Microsoft Helena
-  Paulina
-  Sabina
-  Dalia
-  Helena
-- si no existe es-MX, usar cualquier voz es-*
-- cancelar voz anterior antes de hablar
-- evitar crashear si speechSynthesis no existe
-- cargar voces aunque getVoices() venga vacío al inicio
+Comportamiento:
 
-Configuración sugerida:
+- Detectar si el usuario está en Chrome móvil.
+- Si NO es Chrome móvil, no mostrar nada.
+- Si ya existe en localStorage:
+  alfabetrix_voice_permission = "accepted"
+  o
+  alfabetrix_voice_permission = "rejected"
+  no mostrar nada.
+- Si es Chrome móvil y no hay decisión guardada, mostrar modal.
 
-rate: 0.82
-pitch: 1.08
-volume: según configuración actual del usuario
+Diseño:
 
-Debe sonar:
-- más pausado
-- cálido
-- claro
-- amable
-- adecuado para adultos mayores
+- Overlay fixed inset-0
+- Fondo negro con opacidad 65%
+- z-index muy alto, por ejemplo z-[9999]
+- Card centrada
+- Estilo cálido de ALFABETRIX:
+  - fondo beige/blanco
+  - bordes redondeados grandes
+  - sombra suave
+  - título en guinda
+  - texto claro y cordial
+  - botón aceptar guinda
+  - botón rechazar outline o neutro
+- Sin botón X / close.
+- Solo se cierra con:
+  - Rechazar
+  - Aceptar
 
-Agregar una función opcional de debug, comentada o segura, para listar voces disponibles:
+Texto sugerido:
 
-console.table(
-  speechSynthesis.getVoices().map(v => ({
-    name: v.name,
-    lang: v.lang
-  }))
-)
+Título:
+Activar voz de apoyo
 
-No dejar console.table activo en producción salvo que esté detrás de una condición DEBUG.
+Mensaje:
+Para que ALFABETRIX pueda leer instrucciones y actividades en voz alta, toque Aceptar. Esto ayuda a escuchar cada paso con calma.
 
-2. Mantener compatibilidad
+Texto secundario:
+Puede continuar sin voz si lo prefiere.
 
-No cambiar la forma en que otros archivos llaman:
+Botones:
+- Rechazar
+- Aceptar
 
-speak(text)
+==================================================
+2. FUNCIÓN DE DESBLOQUEO DE VOZ
+==================================================
 
-Si actualmente speak recibe volumen o parámetros, mantener compatibilidad.
+Modificar o usar src/lib/tts.js
 
-Si existe stopSpeaking(), mantenerla.
+Agregar export:
 
-Si existe preloadVoices(), mantenerla o mejorarla.
+unlockVoice()
 
-3. Revisar textos que se reproducen
+Debe:
+- Verificar window.speechSynthesis
+- Crear una SpeechSynthesisUtterance corta
+- Texto sugerido:
+  "Voz activada."
+- lang = "es-MX"
+- rate = 0.82
+- pitch = 1.08
+- volume = 0.01 o 0.2 según funcione mejor
+- Usar la misma selección de voz que speak()
+- Ejecutar speechSynthesis.speak(utterance) dentro del click del botón Aceptar
+- Guardar:
+  localStorage.setItem("alfabetrix_voice_unlocked", "1")
+  localStorage.setItem("alfabetrix_voice_permission", "accepted")
+- Devolver true si pudo intentar activar
 
-Buscar en src:
+Si el usuario rechaza:
+localStorage.setItem("alfabetrix_voice_permission", "rejected")
+localStorage.removeItem("alfabetrix_voice_unlocked")
 
-audio_text
-speak(
-LexBubble
-getRandomLexMessage
-"incorrect"
-"correct"
-"Casi"
-"mal"
-"error"
-"fallaste"
-"intenta"
-"escuchar"
-"ayuda"
+==================================================
+3. DETECCIÓN CHROME MÓVIL
+==================================================
 
-Revisar especialmente:
+En el componente usar algo como:
 
-src/components/ExerciseRenderer.jsx
-src/components/LexBubble.jsx
-src/lib/modules.js
-src/pages/CreateProfile.jsx
-src/pages/Results.jsx
-src/pages/Help.jsx
-src/pages/Settings.jsx
-src/pages/Activity.jsx
+const ua = navigator.userAgent || "";
 
-4. Ajustar textos para que sean más fáciles de reproducir
+const isMobile =
+  /Android|iPhone|iPad|iPod/i.test(ua);
 
-Los textos deben ser:
+const isChrome =
+  /Chrome|CriOS/i.test(ua) &&
+  !/Edg|OPR|SamsungBrowser/i.test(ua);
 
-- cordiales
-- cortos
-- claros
-- pausados
-- fáciles de entender al escucharlos
-- adecuados para adultos mayores
-- sin frases largas
-- sin palabras difíciles
-- sin tono infantil
-- sin regaños
-- sin “mal”, “incorrecto”, “fallaste”
-- sin signos excesivos
-- sin emojis dentro del texto leído por voz
+const shouldShow =
+  isMobile &&
+  isChrome &&
+  !localStorage.getItem("alfabetrix_voice_permission");
 
-Ejemplos de estilo correcto:
+No romper si navigator no existe.
 
-En vez de:
-"Incorrecto"
+==================================================
+4. AGREGAR MODAL AL HOME
+==================================================
 
-Usar:
-"Casi. Vamos a intentarlo otra vez con calma."
+El modal debe aparecer cuando llegue al Home/MainMenu.
 
-En vez de:
-"Respuesta correcta"
+Modificar:
 
-Usar:
-"Muy bien. Esa es la respuesta."
+src/pages/MainMenu.jsx
 
-En vez de:
-"Elige la respuesta correcta"
+Importar:
 
-Usar:
-"Escuche con calma. Después toque la respuesta."
+import VoicePermissionModal from "@/components/VoicePermissionModal";
 
-En vez de:
-"Completaste el módulo exitosamente"
+Renderizar dentro del return, en el nivel más alto posible:
 
-Usar:
-"Excelente trabajo. Usted completó este módulo."
+<VoicePermissionModal />
 
-En vez de:
-"Vamos a continuar con la siguiente actividad"
+Debe quedar encima de todo por z-index.
 
-Usar:
-"Ahora podemos continuar con la siguiente actividad."
+==================================================
+5. REUTILIZABLE
+==================================================
 
-5. Ajustar audio_text de actividades si están en src/lib/modules.js
+El componente debe poder usarse después en otras páginas si hace falta:
 
-Si existen actividades locales con audio_text, hacerlos más naturales:
+<VoicePermissionModal />
 
-Ejemplo:
-"La letra A, como en agua. Escuche con calma: A."
+No debe depender exclusivamente de MainMenu.
 
-No usar textos muy largos.
+==================================================
+6. AJUSTAR speak()
+==================================================
 
-6. Ajustar mensajes de Lex
+En src/lib/tts.js revisar speak(text):
 
-Los mensajes de Lex deben sonar así:
+- Si está en Chrome móvil y localStorage alfabetrix_voice_permission === "rejected", no hablar.
+- Si está en Chrome móvil y no existe alfabetrix_voice_unlocked, evitar autoplay.
+- Pero si speak() es llamado desde un botón manual de "Escuchar", debe intentar hablar normalmente.
+- No lanzar errores.
+- Mantener stopSpeaking().
+- Mantener configuración de voz es-MX.
+- Mantener selección de mejor voz.
 
-- “Muy bien. Siga así.”
-- “Casi. Intentemos otra vez.”
-- “Respire con calma. Usted puede hacerlo.”
-- “Toque la opción que escuchó.”
-- “Si necesita ayuda, toque el botón de ejemplo.”
-- “Excelente trabajo. Su avance quedó guardado.”
-
-Evitar:
-- “¡Genial!”
-- “¡Wow!”
-- “incorrecto”
-- “fallaste”
-- “perdiste”
-- frases infantiles
-
-7. Pruebas
+==================================================
+7. PRUEBAS
+==================================================
 
 Ejecutar:
 
 cmd.exe /c npm run build
 
-Luego probar localmente:
+Probar local:
 
 npm run dev
 
-Y verificar:
+Pruebas:
 
-- Crear perfil reproduce voz cordial.
-- Actividades reproducen instrucciones claras.
-- Respuesta correcta suena amable.
-- Respuesta equivocada no regaña.
-- Resultados se escuchan bien.
-- Ayuda se escucha clara.
-- Configuración no rompe TTS.
-- No hay errores en consola.
+1. En Chrome móvil abrir la app.
+2. Llegar al Home/MainMenu.
+3. Debe aparecer modal con overlay oscuro.
+4. No debe tener botón cerrar.
+5. Rechazar:
+   - cierra modal
+   - guarda rejected
+   - no vuelve a salir
+6. Aceptar:
+   - intenta reproducir "Voz activada."
+   - guarda accepted
+   - guarda alfabetrix_voice_unlocked = "1"
+   - cierra modal
+7. Después probar botones de audio.
+8. En escritorio no debe aparecer el modal.
+9. En móvil no Chrome no debe aparecer, salvo que decidas hacerlo compatible.
 
-8. Entrega final
+==================================================
+8. ENTREGA FINAL
+==================================================
 
-Al terminar, reportar:
+Al final reportar:
 
+- archivos creados
 - archivos modificados
-- cambios hechos en tts.js
-- textos ajustados
+- cómo funciona unlockVoice()
+- cómo se detecta Chrome móvil
+- cómo reiniciar la decisión si quiero probar otra vez
 - si npm run build pasó
 - qué debo probar manualmente
-- si queda algún pendiente
 
-No hagas git commit.
-No hagas push.
+No hacer git commit.
+No hacer push.

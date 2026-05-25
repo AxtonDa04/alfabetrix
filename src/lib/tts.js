@@ -17,6 +17,37 @@ function getSpeechSynthesis() {
   return window.speechSynthesis || null;
 }
 
+function getStorageValue(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function setStorageValue(key, value) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Ignore storage errors in private or restricted browsers.
+  }
+}
+
+export function isChromeMobile() {
+  if (typeof navigator === "undefined") return false;
+
+  const ua = navigator.userAgent || "";
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+  const isChrome = /Chrome|CriOS/i.test(ua) && !/Edg|OPR|SamsungBrowser/i.test(ua);
+
+  return isMobile && isChrome;
+}
+
+function hasActiveUserGesture() {
+  if (typeof navigator === "undefined") return false;
+  return Boolean(navigator.userActivation?.isActive);
+}
+
 function loadVoices() {
   const synthesis = getSpeechSynthesis();
   if (!synthesis) return [];
@@ -71,22 +102,64 @@ export function debugVoices() {
   );
 }
 
+function applyVoiceSettings(utterance, volume) {
+  utterance.lang = "es-MX";
+  utterance.rate = 0.82;
+  utterance.pitch = 1.08;
+  utterance.volume = Math.max(0, Math.min(1, volume));
+
+  const spanishVoice = getBestSpanishVoice();
+  if (spanishVoice) utterance.voice = spanishVoice;
+}
+
+export function unlockVoice() {
+  const synthesis = getSpeechSynthesis();
+  if (!synthesis) return false;
+
+  try {
+    synthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance("Voz activada.");
+    applyVoiceSettings(utterance, 0.2);
+    currentUtterance = utterance;
+    synthesis.speak(utterance);
+
+    setStorageValue("alfabetrix_voice_unlocked", "1");
+    setStorageValue("alfabetrix_voice_permission", "accepted");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function rejectVoicePermission() {
+  setStorageValue("alfabetrix_voice_permission", "rejected");
+
+  try {
+    localStorage.removeItem("alfabetrix_voice_unlocked");
+  } catch {
+    // Ignore storage errors in private or restricted browsers.
+  }
+}
+
 export function speak(text, onEnd) {
   const synthesis = getSpeechSynthesis();
   if (!synthesis || !text) return;
 
+  if (isChromeMobile()) {
+    const permission = getStorageValue("alfabetrix_voice_permission");
+    const unlocked = getStorageValue("alfabetrix_voice_unlocked") === "1";
+
+    if (permission === "rejected") return;
+    if (!unlocked && !hasActiveUserGesture()) return;
+  }
+
   synthesis.cancel();
   
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "es-MX";
-  utterance.rate = 0.82;
-  utterance.pitch = 1.08;
   
   const volume = parseInt(localStorage.getItem("alfabetrix_volume") || "80", 10);
-  utterance.volume = Math.max(0, Math.min(1, volume / 100));
-
-  const spanishVoice = getBestSpanishVoice();
-  if (spanishVoice) utterance.voice = spanishVoice;
+  applyVoiceSettings(utterance, volume / 100);
 
   if (onEnd) utterance.onend = onEnd;
   currentUtterance = utterance;
