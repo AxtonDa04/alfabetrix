@@ -2,10 +2,11 @@
 
 require_once __DIR__ . "/cors.php";
 
-$host = "localhost";
-$db_name = "alfabetrix";
-$username = "root";
-$password = "";
+
+$host = "fdb1032.awardspace.net";
+$db_name = "4762204_alfabetrix";
+$username = "4762204_alfabetrix";
+$password = "MypassR323323332";
 
 try {
     $pdo = new PDO(

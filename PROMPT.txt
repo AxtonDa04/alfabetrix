@@ -1,0 +1,58 @@
+ERROR EN PRODUCCIÓN SUPABASE
+
+En Vercel la app ya conecta a Supabase, pero fallan Módulos y Mi Progreso.
+
+Error visible:
+invalid input syntax for type integer: "true"
+
+Conclusión:
+Algunas columnas migradas desde MySQL quedaron como integer 0/1, pero el código las consulta como boolean true/false.
+
+Revisar y corregir solo services y páginas necesarias.
+
+Buscar en src:
+
+.eq("is_active", true)
+.eq("completed", true)
+.eq("is_correct", true)
+.eq("onboarding_complete", true)
+true en filtros Supabase
+
+Corregir según la BD migrada:
+
+Si la columna en Supabase es integer:
+usar 1 en vez de true
+usar 0 en vez de false
+
+Ejemplos:
+
+.eq("is_active", 1)
+.eq("completed", 1)
+.eq("is_correct", 1)
+
+Revisar especialmente:
+
+src/services/modulesService.js
+src/services/activitiesService.js
+src/services/activityOptionsService.js
+src/services/progressService.js
+src/services/rewardsService.js
+src/pages/MyProgress.jsx
+src/pages/ModuleSelect.jsx
+src/pages/MainMenu.jsx
+
+Objetivo:
+
+1. Módulos debe cargar los 6 módulos.
+2. Mi Progreso no debe mostrar error.
+3. Home debe seguir funcionando.
+4. No tocar diseño.
+5. No cambiar estructura visual.
+6. No hacer git commit.
+7. Ejecutar cmd.exe /c npm run build.
+
+Al final reportar:
+- archivos modificados
+- filtros boolean corregidos
+- si build pasó
+- qué debo probar

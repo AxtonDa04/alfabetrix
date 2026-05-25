@@ -39,7 +39,7 @@ export async function getRewardCatalog() {
   const { data, error } = await supabase
     .from("reward_catalog")
     .select("*")
-    .eq("is_active", true)
+    .eq("is_active", 1)
     .order("created_at", { ascending: true });
 
   if (error) throw error;

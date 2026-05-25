@@ -87,13 +87,13 @@ export async function request(endpoint, options = {}) {
       result = await supabase
         .from("modules")
         .select("*")
-        .eq("is_active", true)
+        .eq("is_active", 1)
         .order("order_index", { ascending: true });
     } else if (normalizedEndpoint.startsWith("activities")) {
       let query = supabase
         .from("activities")
         .select("*")
-        .eq("is_active", true);
+        .eq("is_active", 1);
 
       if (params.get("module_id")) {
         query = query.eq("module_id", params.get("module_id"));
@@ -127,6 +127,7 @@ export async function request(endpoint, options = {}) {
               last_activity_at: new Date().toISOString(),
               completed_at: body.completed ? new Date().toISOString() : null,
               ...body,
+              completed: toDbFlag(body.completed, false),
             },
             { onConflict: "user_profile_id,module_id" }
           )
@@ -158,7 +159,7 @@ export async function request(endpoint, options = {}) {
 
       const [rewardsResult, catalogResult] = await Promise.all([
         query.order("unlocked_at", { ascending: false }),
-        supabase.from("reward_catalog").select("*").eq("is_active", true),
+        supabase.from("reward_catalog").select("*").eq("is_active", 1),
       ]);
 
       if (rewardsResult.error) throw rewardsResult.error;

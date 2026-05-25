@@ -1,5 +1,9 @@
 import { supabase } from "./supabaseClient";
 
+function toDbFlag(value, defaultValue = false) {
+  return value ?? defaultValue ? 1 : 0;
+}
+
 export async function getProgress({ userProfileId = null, moduleId = null } = {}) {
   let query = supabase.from("module_progress").select("*");
 
@@ -25,6 +29,7 @@ export async function saveProgress(progressData) {
     last_activity_at: new Date().toISOString(),
     completed_at: progressData.completed ? new Date().toISOString() : null,
     ...progressData,
+    completed: toDbFlag(progressData.completed, false),
   };
 
   const { data, error } = await supabase

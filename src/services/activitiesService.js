@@ -4,7 +4,7 @@ export async function getActivities(moduleId) {
   let query = supabase
     .from("activities")
     .select("*")
-    .eq("is_active", true);
+    .eq("is_active", 1);
 
   if (moduleId) {
     query = query.eq("module_id", moduleId);
