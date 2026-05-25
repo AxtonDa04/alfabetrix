@@ -1,58 +1,231 @@
-ERROR EN PRODUCCIÓN SUPABASE
+MEJORA DE VOZ TTS Y TEXTOS DE AUDIO — ALFABETRIX
 
-En Vercel la app ya conecta a Supabase, pero fallan Módulos y Mi Progreso.
+Objetivo:
+Mejorar la experiencia de voz de la app para que suene más humana, cordial, clara y menos robótica, sin agregar archivos MP3 ni servicios de pago.
 
-Error visible:
-invalid input syntax for type integer: "true"
+Contexto:
+La app usa Web Speech API.
+El archivo principal es:
 
-Conclusión:
-Algunas columnas migradas desde MySQL quedaron como integer 0/1, pero el código las consulta como boolean true/false.
+src/lib/tts.js
 
-Revisar y corregir solo services y páginas necesarias.
+Actualmente los textos se reproducen con:
+SpeechSynthesisUtterance
+
+No existen audios físicos.
+La app lee textos desde:
+- audio_text
+- question
+- LexBubble
+- mensajes de feedback
+- textos de ayuda
+- módulos/actividades
+
+IMPORTANTE:
+No tocar diseño visual.
+No tocar estructura de rutas.
+No modificar base de datos.
+No romper Supabase.
+No hacer commit.
+No hacer push.
+
+TAREAS:
+
+1. Mejorar src/lib/tts.js
+
+Revisar la función speak() y ajustarla para:
+
+- usar lang = "es-MX"
+- seleccionar automáticamente la mejor voz disponible en español
+- priorizar voces de Google o Microsoft si existen
+- priorizar voces con nombres como:
+  Google español
+  Microsoft Dalia
+  Microsoft Sabina
+  Microsoft Helena
+  Paulina
+  Sabina
+  Dalia
+  Helena
+- si no existe es-MX, usar cualquier voz es-*
+- cancelar voz anterior antes de hablar
+- evitar crashear si speechSynthesis no existe
+- cargar voces aunque getVoices() venga vacío al inicio
+
+Configuración sugerida:
+
+rate: 0.82
+pitch: 1.08
+volume: según configuración actual del usuario
+
+Debe sonar:
+- más pausado
+- cálido
+- claro
+- amable
+- adecuado para adultos mayores
+
+Agregar una función opcional de debug, comentada o segura, para listar voces disponibles:
+
+console.table(
+  speechSynthesis.getVoices().map(v => ({
+    name: v.name,
+    lang: v.lang
+  }))
+)
+
+No dejar console.table activo en producción salvo que esté detrás de una condición DEBUG.
+
+2. Mantener compatibilidad
+
+No cambiar la forma en que otros archivos llaman:
+
+speak(text)
+
+Si actualmente speak recibe volumen o parámetros, mantener compatibilidad.
+
+Si existe stopSpeaking(), mantenerla.
+
+Si existe preloadVoices(), mantenerla o mejorarla.
+
+3. Revisar textos que se reproducen
 
 Buscar en src:
 
-.eq("is_active", true)
-.eq("completed", true)
-.eq("is_correct", true)
-.eq("onboarding_complete", true)
-true en filtros Supabase
-
-Corregir según la BD migrada:
-
-Si la columna en Supabase es integer:
-usar 1 en vez de true
-usar 0 en vez de false
-
-Ejemplos:
-
-.eq("is_active", 1)
-.eq("completed", 1)
-.eq("is_correct", 1)
+audio_text
+speak(
+LexBubble
+getRandomLexMessage
+"incorrect"
+"correct"
+"Casi"
+"mal"
+"error"
+"fallaste"
+"intenta"
+"escuchar"
+"ayuda"
 
 Revisar especialmente:
 
-src/services/modulesService.js
-src/services/activitiesService.js
-src/services/activityOptionsService.js
-src/services/progressService.js
-src/services/rewardsService.js
-src/pages/MyProgress.jsx
-src/pages/ModuleSelect.jsx
-src/pages/MainMenu.jsx
+src/components/ExerciseRenderer.jsx
+src/components/LexBubble.jsx
+src/lib/modules.js
+src/pages/CreateProfile.jsx
+src/pages/Results.jsx
+src/pages/Help.jsx
+src/pages/Settings.jsx
+src/pages/Activity.jsx
 
-Objetivo:
+4. Ajustar textos para que sean más fáciles de reproducir
 
-1. Módulos debe cargar los 6 módulos.
-2. Mi Progreso no debe mostrar error.
-3. Home debe seguir funcionando.
-4. No tocar diseño.
-5. No cambiar estructura visual.
-6. No hacer git commit.
-7. Ejecutar cmd.exe /c npm run build.
+Los textos deben ser:
 
-Al final reportar:
+- cordiales
+- cortos
+- claros
+- pausados
+- fáciles de entender al escucharlos
+- adecuados para adultos mayores
+- sin frases largas
+- sin palabras difíciles
+- sin tono infantil
+- sin regaños
+- sin “mal”, “incorrecto”, “fallaste”
+- sin signos excesivos
+- sin emojis dentro del texto leído por voz
+
+Ejemplos de estilo correcto:
+
+En vez de:
+"Incorrecto"
+
+Usar:
+"Casi. Vamos a intentarlo otra vez con calma."
+
+En vez de:
+"Respuesta correcta"
+
+Usar:
+"Muy bien. Esa es la respuesta."
+
+En vez de:
+"Elige la respuesta correcta"
+
+Usar:
+"Escuche con calma. Después toque la respuesta."
+
+En vez de:
+"Completaste el módulo exitosamente"
+
+Usar:
+"Excelente trabajo. Usted completó este módulo."
+
+En vez de:
+"Vamos a continuar con la siguiente actividad"
+
+Usar:
+"Ahora podemos continuar con la siguiente actividad."
+
+5. Ajustar audio_text de actividades si están en src/lib/modules.js
+
+Si existen actividades locales con audio_text, hacerlos más naturales:
+
+Ejemplo:
+"La letra A, como en agua. Escuche con calma: A."
+
+No usar textos muy largos.
+
+6. Ajustar mensajes de Lex
+
+Los mensajes de Lex deben sonar así:
+
+- “Muy bien. Siga así.”
+- “Casi. Intentemos otra vez.”
+- “Respire con calma. Usted puede hacerlo.”
+- “Toque la opción que escuchó.”
+- “Si necesita ayuda, toque el botón de ejemplo.”
+- “Excelente trabajo. Su avance quedó guardado.”
+
+Evitar:
+- “¡Genial!”
+- “¡Wow!”
+- “incorrecto”
+- “fallaste”
+- “perdiste”
+- frases infantiles
+
+7. Pruebas
+
+Ejecutar:
+
+cmd.exe /c npm run build
+
+Luego probar localmente:
+
+npm run dev
+
+Y verificar:
+
+- Crear perfil reproduce voz cordial.
+- Actividades reproducen instrucciones claras.
+- Respuesta correcta suena amable.
+- Respuesta equivocada no regaña.
+- Resultados se escuchan bien.
+- Ayuda se escucha clara.
+- Configuración no rompe TTS.
+- No hay errores en consola.
+
+8. Entrega final
+
+Al terminar, reportar:
+
 - archivos modificados
-- filtros boolean corregidos
-- si build pasó
-- qué debo probar
+- cambios hechos en tts.js
+- textos ajustados
+- si npm run build pasó
+- qué debo probar manualmente
+- si queda algún pendiente
+
+No hagas git commit.
+No hagas push.

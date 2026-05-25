@@ -73,8 +73,8 @@ export default function CreateProfile() {
 
         speak(
           forceProfileSelect
-            ? "Seleccione un usuario para continuar o cree uno nuevo."
-            : "Bienvenido a Alfabetrix. Por favor, díganos su nombre para comenzar."
+            ? "Seleccione un usuario para continuar. También puede crear uno nuevo."
+            : "Bienvenido a Alfabetrix. Escriba su nombre para comenzar."
         );
       } catch (error) {
         console.error("Error al consultar perfiles:", error);
@@ -92,7 +92,7 @@ export default function CreateProfile() {
 
     localStorage.removeItem(FORCE_PROFILE_SELECT_KEY);
     setLocalUser(normalizedProfile);
-    speak(`Bienvenido de nuevo, ${normalizedProfile.name}.`);
+    speak(`Bienvenido de nuevo, ${normalizedProfile.name}. Continuemos con calma.`);
     navigate("/menu", { replace: true });
   };
 
@@ -124,7 +124,7 @@ export default function CreateProfile() {
         setShowNewProfileForm(true);
       }
 
-      speak(`Perfil de ${normalizedProfile.name} eliminado.`);
+      speak(`El perfil de ${normalizedProfile.name} fue eliminado.`);
     } catch (error) {
       console.error("Error al eliminar perfil:", error);
       window.alert(
@@ -163,7 +163,7 @@ export default function CreateProfile() {
         setLocalUser(createdProfile);
       }
 
-      speak(`Mucho gusto, ${name.trim()}. Vamos a aprender juntos.`);
+      speak(`Mucho gusto, ${name.trim()}. Vamos a aprender paso a paso.`);
       setTimeout(() => navigate("/menu", { replace: true }), 900);
     } catch (error) {
       console.error("Error al crear perfil:", error);

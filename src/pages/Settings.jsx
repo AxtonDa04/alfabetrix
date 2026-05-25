@@ -45,7 +45,7 @@ export default function Settings() {
       clearLocalProfile();
       localStorage.setItem(FORCE_PROFILE_SELECT_KEY, "1");
       logout(false);
-      speak("Sesión cerrada. Puede elegir otro usuario.");
+      speak("Sesión cerrada. Ahora puede elegir otro usuario.");
     } catch (error) {
       console.error("Error cerrando sesión local:", error);
     } finally {
@@ -84,7 +84,7 @@ export default function Settings() {
                 key={opt.value}
                 onClick={() => {
                   updateSetting("fontSize", opt.value);
-                  speak(`Letra ${opt.label}`);
+                  speak(`Tamaño de letra ${opt.label}.`);
                 }}
                 className={`rounded-[1.25rem] border p-4 text-center transition-all ${
                   settings.fontSize === opt.value
@@ -118,7 +118,7 @@ export default function Settings() {
               checked={settings.highContrast}
               onCheckedChange={(v) => {
                 updateSetting("highContrast", v);
-                speak(v ? "Alto contraste activado" : "Alto contraste desactivado");
+                speak(v ? "Alto contraste activado." : "Alto contraste desactivado.");
               }}
             />
           </div>
@@ -143,7 +143,7 @@ export default function Settings() {
           <Slider
             value={[settings.volume]}
             onValueChange={([v]) => updateSetting("volume", v)}
-            onValueCommit={() => speak("Así suena el volumen")}
+            onValueCommit={() => speak("Así suena el volumen de la voz.")}
             max={100}
             step={10}
             className="py-2"

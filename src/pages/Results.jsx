@@ -59,20 +59,20 @@ export default function Results() {
 
     const msg =
       excellent
-        ? `¡Excelente avance! ${correct} de ${total} correctas. ${getRandomLexMessage("encouragement")}`
+        ? `Excelente trabajo. ${correct} de ${total} respuestas correctas. ${getRandomLexMessage("encouragement")}`
         : passedModule
-        ? `¡Muy bien! ${correct} de ${total} correctas. ${getRandomLexMessage("encouragement")}`
-        : `${correct} de ${total} correctas. ${getRandomLexMessage("incorrect")}`;
+        ? `Muy bien. ${correct} de ${total} respuestas correctas. ${getRandomLexMessage("encouragement")}`
+        : `${correct} de ${total} respuestas correctas. ${getRandomLexMessage("incorrect")}`;
 
     speak(msg);
   }, [correct, excellent, passedModule, percentage, total]);
 
   const lexMessage =
     excellent
-      ? "Completó este paso con mucha seguridad. Vas muy bien."
+      ? "Completó este paso con mucha seguridad. Usted va muy bien."
       : passedModule
       ? "Buen trabajo. El siguiente paso ya está listo."
-      : "No se desanime. Cada intento cuenta. Repitamos con calma.";
+      : "Casi. Cada intento cuenta. Repitamos con calma.";
 
   const handlePrimaryAction = () => {
     if (passedModule && hasNextModule) {

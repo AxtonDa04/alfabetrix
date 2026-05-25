@@ -12,19 +12,19 @@ import AppHeader from "@/components/AppHeader";
 const FAQS = [
   {
     q: "¿Cómo inicio una lección?",
-    a: "Toque el botón Aprender en el menú principal. Después elija un módulo desbloqueado.",
+    a: "Toque Aprender en el menú principal. Después elija un módulo disponible.",
   },
   {
     q: "¿Qué hago si no entiendo un ejercicio?",
-    a: "Toque Escuchar para oír la instrucción otra vez o Ver pista para recibir ayuda.",
+    a: "Toque Escuchar para oír la instrucción otra vez. También puede tocar Pista.",
   },
   {
     q: "¿Cómo desbloqueo un módulo?",
-    a: "Complete el módulo anterior con al menos setenta por ciento de avance para desbloquear el siguiente.",
+    a: "Complete el módulo anterior con setenta por ciento o más. Así se abre el siguiente.",
   },
   {
     q: "¿Puedo repetir un módulo?",
-    a: "Sí. Puede repetir cualquier módulo las veces que necesite para practicar con calma.",
+    a: "Sí. Puede repetir cualquier módulo las veces que necesite.",
   },
   {
     q: "¿Cómo hago la letra más grande?",
@@ -32,7 +32,7 @@ const FAQS = [
   },
   {
     q: "¿Qué son las estrellas?",
-    a: "Las estrellas reconocen su avance. Tres estrellas significan un desempeño excelente.",
+    a: "Las estrellas reconocen su avance. Tres estrellas indican un avance excelente.",
   },
 ];
 
@@ -50,7 +50,7 @@ const STEPS = [
   {
     icon: RefreshCw,
     title: "Repita",
-    text: "Puede volver a practicar sin castigos.",
+    text: "Puede volver a practicar con calma.",
   },
 ];
 
@@ -76,7 +76,7 @@ export default function Help() {
           <Button
             className="app-secondary mt-5 w-full gap-2"
             variant="outline"
-            onClick={() => speak("Bienvenido a la ayuda. Escuche, toque y repita con calma.")}
+            onClick={() => speak("Bienvenido a la ayuda. Escuche con calma. Toque una pregunta para conocer la respuesta.")}
           >
             <Volume2 className="h-5 w-5 text-guinda" />
             Escuchar explicación

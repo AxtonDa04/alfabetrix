@@ -28,7 +28,7 @@ export default function ExerciseRenderer({ exercise, onAnswer }) {
     setFeedback(isCorrect ? "correct" : "incorrect");
 
     const msg = getRandomLexMessage(isCorrect ? "correct" : "incorrect");
-    speak(isCorrect ? `¡Correcto! ${msg}` : msg);
+    speak(msg);
 
     setTimeout(() => onAnswer(isCorrect, option), 1450);
   };
@@ -103,7 +103,7 @@ export default function ExerciseRenderer({ exercise, onAnswer }) {
             <Lightbulb className="h-5 w-5" />
           </div>
           <p className="flex-1 text-base font-extrabold leading-relaxed text-verde">
-            {exercise.hint || exercise.example_text || "Escuche con calma y elija la opción que corresponda."}
+            {exercise.hint || exercise.example_text || "Escuche con calma. Después toque la respuesta."}
           </p>
         </motion.div>
       )}

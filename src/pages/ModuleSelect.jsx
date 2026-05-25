@@ -78,7 +78,7 @@ export default function ModuleSelect() {
           setProgressMap(map);
         }
 
-        speak("Elija el módulo que desea practicar.");
+        speak("Elija el módulo que desea practicar. Puede avanzar con calma.");
       } catch (error) {
         console.error("Error al cargar módulos o progreso desde Supabase:", error);
       } finally {
@@ -151,7 +151,7 @@ export default function ModuleSelect() {
                 transition={{ delay: index * 0.06 }}
                 disabled={!unlocked}
                 onClick={() => {
-                  speak(`Módulo ${mod.id}: ${mod.name}`);
+                  speak(`Módulo ${mod.id}. ${mod.name}.`);
                   navigate(`/activity/${mod.id}`);
                 }}
                 className={`relative z-10 flex w-full items-center gap-4 rounded-[1.75rem] border p-4 text-left shadow-soft transition-all ${

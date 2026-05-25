@@ -155,7 +155,7 @@ export default function MyProgress() {
         const totalModules = supabaseModules.length || LOCAL_MODULES.length || 6;
 
         speak(
-          `Ha completado ${completed} de ${totalModules} módulos. ¡Siga adelante!`
+          `Ha completado ${completed} de ${totalModules} módulos. Siga adelante con calma.`
         );
       } catch (error) {
         console.error("Error cargando Mi Progreso:", error);

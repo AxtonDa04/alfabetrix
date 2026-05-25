@@ -169,7 +169,7 @@ export default function MainMenu() {
           nextModule,
         });
 
-        speak(`Hola ${profile.name || "Usuario"}. ¿Qué le gustaría hacer hoy?`);
+        speak(`Hola ${profile.name || "Usuario"}. ¿Qué le gustaría practicar hoy?`);
       } catch (error) {
         console.error("Error al cargar menú:", error);
         navigate("/create-profile");
@@ -223,7 +223,7 @@ export default function MainMenu() {
               <button
                 type="button"
                 className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-guinda shadow-sm ring-1 ring-border/70"
-                onClick={() => speak(`Hola ${userName}. Tu avance actual es ${stats.percentage} por ciento.`)}
+                onClick={() => speak(`Hola ${userName}. Su avance actual es ${stats.percentage} por ciento.`)}
                 aria-label="Escuchar resumen"
               >
                 <Bell className="h-5 w-5" />
@@ -248,7 +248,7 @@ export default function MainMenu() {
 
             <button
               onClick={() => {
-                speak("Continuar aprendiendo");
+                speak("Continuemos con el aprendizaje.");
                 navigate("/modules");
               }}
               className="alf-big-action mt-5"
